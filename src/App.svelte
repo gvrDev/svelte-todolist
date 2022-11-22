@@ -10,6 +10,7 @@
     new Task(String(taskCounter++), "Finish Prototype1"),
     new Task(String(taskCounter++), "Lorem Ipsum"),
     new Task(String(taskCounter++), "Ameno Dorime"),
+    new Task(String(taskCounter++), "Test Bash Script"),
   ];
 
   const handleKeyPress = (e: KeyboardEvent) => {
