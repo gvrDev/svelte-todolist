@@ -22,10 +22,33 @@
   }
 
   const handleClickDeleteBtn = (e: MouseEvent) => {
-    const btnEl: HTMLElement = e.composedPath().at(1) as HTMLElement;
-    const taskCardId: string = btnEl.className.split(' ').at(0).split('-').at(0);
+    const taskCardEl: HTMLElement = e.composedPath().at(1) as HTMLElement;
+    const taskCardId: string = taskCardEl.className.split(' ').at(0).split('-').at(0);
     
     taskList = taskList.filter(task => {return task.id !== taskCardId});
+  }
+
+  const handleChangeToggleEl = (e: Event) => {
+    const inputEl: HTMLInputElement = e.target as HTMLInputElement;
+    const taskCardEl: HTMLElement = e.composedPath().at(1) as HTMLElement;
+    const taskCardId: string = taskCardEl.className.split(' ').at(0).split('-').at(0);
+
+    if(inputEl.checked){
+      taskList = taskList.map(task => {
+        if(task.id === taskCardId){
+          task.finishTask();
+        }
+        return task;
+      })
+    }
+    else{
+      taskList = taskList.map(task => {
+        if(task.id === taskCardId){
+          task.restartTask();
+        }
+        return task;
+      })
+    }
   }
 </script>
 
@@ -42,7 +65,7 @@
     <div class="flex flex-col">
       {#each taskList as task }
         <div class="{task.id}-task-card task-card flex flex-row mt-4">
-          <input type="checkbox">
+          <input type="checkbox" on:change={handleChangeToggleEl}>
           <div class="ml-2 mr-2 w-[36rem] max-w-xl break-all text-justify">{task.description}</div>
           <button on:click={handleClickDeleteBtn}>DELETE</button>
         </div>
