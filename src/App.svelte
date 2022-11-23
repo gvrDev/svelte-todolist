@@ -47,7 +47,7 @@
 
   const handleClickDeleteBtn = (e: MouseEvent) => {
     const taskCardEl: HTMLElement = e.composedPath().at(1) as HTMLElement;
-    const taskCardId: string = taskCardEl.className.split(' ').at(0).split('-').at(0);
+    const taskCardId: string = taskCardEl.id.split('-')[0];
     
     taskList = taskList.filter(task => {return task.id !== taskCardId});
   }
