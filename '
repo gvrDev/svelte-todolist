@@ -2,9 +2,8 @@
   import { Task } from "./lib/task.interface";
   import { TodoMode } from "./lib/todo-mode.enum";
 
-  let input: string = '';
+  let input: string;
   let inputElement: HTMLButtonElement;
-  let taskCardIdTobeEdited: string;
 
   let todoMode: TodoMode = TodoMode.Normal;
 
@@ -18,30 +17,12 @@
     new Task(String(taskCounter++), "Test Bash Script"),
   ];
 
-  const handleInputKeyPress = (e: KeyboardEvent) => {
-    if (e.key !== 'Enter') return;
-    if (input.trimStart() === '') return;
-
-    if(todoMode === TodoMode.Editing){
-      taskList = taskList.map(task => {
-        if(task.id === taskCardIdTobeEdited){
-          task.description = input;
-        }
-        return task;
-      })
-      todoMode = TodoMode.Normal;
-    }
-    else{
-      taskList = [...taskList, new Task(String(taskCounter++), input)];
-    }
-
-    input = '';
-  }
-
-  const handleTaskInputFocusOut = () => {
-    if(todoMode === TodoMode.Editing){
-      input = '';
-      todoMode = TodoMode.Normal;
+  const handleKeyPress = (e: KeyboardEvent) => {
+    if(e.key === 'Enter') {
+      if(input.trimStart() !== ''){
+        taskList = [...taskList, new Task(String(taskCounter++), input)];
+        input = '';
+      }
     }
   }
 
@@ -53,12 +34,19 @@
   }
 
   const handleClickTaskDescription = (e: MouseEvent) => {
-    const taskCardEl: HTMLElement = e.composedPath().at(2) as HTMLElement;
-    taskCardIdTobeEdited = taskCardEl.id.split('-')[0];
-    input = taskList.filter(task => {return task.id === taskCardIdTobeEdited})[0].description;
+   // const taskCardEl: HTMLElement = e.composedPath().at(2) as HTMLElement;
+   // const taskCardIdNumber: string = taskCardEl.id.split('-')[0];
 
-    todoMode = TodoMode.Editing;
+   // input = taskList.filter(task => {return task.id === taskCardIdNumber})[0].description;
+    //todoMode = TodoMode.Editing;
     inputElement.focus();
+  }
+
+  const handleTaskInputFocusOut = () => {
+    if(todoMode === TodoMode.Editing){
+      input = '';
+      todoMode = TodoMode.Normal;
+    }
   }
 
   const handleChangeToggleEl = (e: Event) => {
@@ -96,7 +84,7 @@
         id="task-input"
         bind:value={input}
         bind:this={inputElement}
-        on:keypress={handleInputKeyPress}
+        on:keypress={handleKeyPress}
         on:focusout={handleTaskInputFocusOut}
         class="mt-8 rounded-md w-[42rem] h-8"
       >
@@ -109,8 +97,8 @@
           <div 
             class="ml-2 mr-2 w-[36rem] max-w-xl break-all text-justify"
           >
-            <div on:mousedown|preventDefault={handleClickTaskDescription}>
-              {task.description}
+            <div on:mousedown={handleClickTaskDescription}>
+            {task.description}
             </div>
           </div>
           <button on:click={handleClickDeleteBtn}>DELETE</button>
