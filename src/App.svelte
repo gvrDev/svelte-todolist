@@ -1,9 +1,10 @@
 <script lang="ts">
+    import { TaskStatus } from "./lib/task-status.enum";
+
   import { Task } from "./lib/task.interface";
   import { TodoMode } from "./lib/todo-mode.enum";
 
   let input: string = '';
-  let inputElement: HTMLButtonElement;
   let taskCardIdTobeEdited: string;
 
   let todoMode: TodoMode = TodoMode.Normal;
@@ -42,46 +43,39 @@
     if(todoMode === TodoMode.Editing){
       input = '';
       todoMode = TodoMode.Normal;
+      document.getElementById(`${taskCardIdTobeEdited}-task-card`).toggleAttribute('editing');
     }
   }
 
-  const handleClickDeleteBtn = (e: MouseEvent) => {
-    const taskCardEl: HTMLElement = e.composedPath().at(1) as HTMLElement;
-    const taskCardId: string = taskCardEl.id.split('-')[0];
-    
-    taskList = taskList.filter(task => {return task.id !== taskCardId});
+  const handleClickDeleteBtn = (taskId: string) => {
+    taskList = taskList.filter(task => {return task.id !== taskId});
   }
 
-  const handleClickTaskDescription = (e: MouseEvent) => {
-    const taskCardEl: HTMLElement = e.composedPath().at(2) as HTMLElement;
-    taskCardIdTobeEdited = taskCardEl.id.split('-')[0];
-    input = taskList.filter(task => {return task.id === taskCardIdTobeEdited})[0].description;
+  const handleClickTaskDescription = (id: string, description: string) => {
+    handleTaskInputFocusOut();
+
+    taskCardIdTobeEdited = id;
+    input = description;
+    document.getElementById(`${id}-task-card`).toggleAttribute('editing');
 
     todoMode = TodoMode.Editing;
-    inputElement.focus();
+    document.getElementById('task-input').focus();
   }
 
-  const handleChangeToggleEl = (e: Event) => {
-    const inputEl: HTMLInputElement = e.target as HTMLInputElement;
-    const taskCardEl: HTMLElement = e.composedPath().at(1) as HTMLElement;
-    const taskCardId: string = taskCardEl.className.split(' ').at(0).split('-').at(0);
-
-    if(inputEl.checked){
-      taskList = taskList.map(task => {
-        if(task.id === taskCardId){
-          task.finishTask();
-        }
-        return task;
-      })
+  const handleChangeToggleEl = (task: Task) => {
+    if(task.status === TaskStatus.Unfinished){
+      task.finishTask();
     }
     else{
-      taskList = taskList.map(task => {
-        if(task.id === taskCardId){
-          task.restartTask();
-        }
-        return task;
-      })
+      task.restartTask();
     }
+
+    taskList = taskList.map(innerTask => {
+      if(innerTask.id === task.id){
+          innerTask = task;
+      }
+      return innerTask;
+    })
   }
 </script>
 
@@ -95,7 +89,6 @@
       <input
         id="task-input"
         bind:value={input}
-        bind:this={inputElement}
         on:keypress={handleInputKeyPress}
         on:focusout={handleTaskInputFocusOut}
         class="mt-8 rounded-md w-[42rem] h-8"
@@ -105,15 +98,13 @@
     <div class="flex flex-col">
       {#each taskList as task }
         <div id="{task.id}-task-card" class="task-card flex flex-row mt-4">
-          <input type="checkbox" on:change={handleChangeToggleEl}>
-          <div 
-            class="ml-2 mr-2 w-[36rem] max-w-xl break-all text-justify"
-          >
-            <div on:mousedown|preventDefault={handleClickTaskDescription}>
+          <input type="checkbox" on:change={() => handleChangeToggleEl(task)}>
+          <div class="ml-2 mr-2 w-[36rem] max-w-xl break-all text-justify" >
+            <div on:mousedown|preventDefault={() => handleClickTaskDescription(task.id, task.description)}>
               {task.description}
             </div>
           </div>
-          <button on:click={handleClickDeleteBtn}>DELETE</button>
+          <button on:click={() => handleClickDeleteBtn(task.id)}>DELETE</button>
         </div>
       {/each}
     </div>
